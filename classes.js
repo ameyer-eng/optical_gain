@@ -45,15 +45,29 @@ class Reflector {
         console.log('Lightfront initialized');
     }
 
-        reflection(mirror_list)
+        check_reflection(left_mirror, right_mirror, table)
         {
-            //for each mirror in mirror list
-                //check to see if wavefront is inside mirror
-                //if so.....
-                    //create a new wavefront with  intensity*(1-r) amplitude traveling in current wave direction
-                    //reverse the direction of wavefront and set it's amplitude to intensity*r
+          //check reflections in the left mirror
+          if (this.origin[0] < left_mirror.origin[0] + left_mirror.width){
+            //reverse the direction and change intensity of current wave
+              this.direction = 1;
+              this.intensity = this.intensity * left_mirror.reflectivity; 
+              this.origin = [left_mirror.origin[0]+25, 10];
+            //create a new wave with no loss remaining intensity to travel
+            table.light_list.push(new Lightfront([left_mirror.origin[0]-25, 10], 10, 400, 1, -1));
+          }
+
+
         }
         
+        draw(canvas){
+          ctx.fillStyle = RGB2Hex(200, 50, 150);
+          canvas.fillRect(this.origin[0], this.origin[1], this.width, this.height)
+        } 
+
+        move(){
+          this.origin[0] += this.direction;
+        }
 
     
   }
@@ -64,7 +78,7 @@ class Reflector {
     constructor() {
         //scene list contains all the objects that do not move
         this.scene_list = [ ];
-        this.global_speed = [];
+        this.light_list = [];
         console.log('Table initialized');
       }
 
@@ -75,6 +89,31 @@ class Reflector {
         }
 
       }
+
+      draw_lights(canvas){
+        for(const item of this.light_list) {
+          item.draw(canvas);
+        }
+      }
+      
+      move_waves(){
+        for(const item of this.light_list) {
+          item.move();
+        }
+      }
+    
+    check_bounds(){
+      for(const item of this.light_list) {
+        if( item.origin[0]< 10 || item.origin[0] > 790){
+          
+          const index = this.light_list.indexOf(item);
+          if (index > -1){
+            this.light_list.splice(index, 1);  //remove the item from the light list
+          }
+        } 
+      }
+    }
+
  }
 
 //Get the canvas to draw the componets onto 
@@ -102,13 +141,55 @@ light_table.scene_list.push(gain_element);
 //initialize the primary light front
 
 let light_front_1 = new Lightfront([100, 10], 10, 400, 1, -1);
+light_table.light_list.push(light_front_1);
 
 
 //Paint the elements (except the table) to the canvas
 light_table.draw_scene(ctx);
-//mirror1.draw(ctx);
-//mirror2.draw(ctx);
-//gain_element.draw(ctx);
+light_table.draw_lights(ctx);
+
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+//main loop//
+
+function Update()
+{
+  //clear the screen for updates
+  ctx.fillStyle = "black";
+  ctx.fillRect(0, 0, c.width, c.height);
+
+  //check to see if any light fronts are off screen and eliminate them from the list
+  light_table.check_bounds();
+
+  //check for reflections
+  light_front_1.check_reflection(mirror1, mirror2, light_table);
+  
+  //move the light front(s) 
+  light_table.move_waves();
+
+  //paint the scene
+  light_table.draw_scene(ctx);
+
+  //paint the light fronts on top of the scene
+  light_table.draw_lights(ctx);
+
+
+  //add a delay...just cause...
+  console.log("loop executed")
+
+}
+
+
+
+
+
+
+
+
+
+
 
 
 
