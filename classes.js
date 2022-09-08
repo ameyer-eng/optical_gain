@@ -1,4 +1,4 @@
-let speed_limit_c = 4;
+let speed_limit_c = 1;
 
 class Reflector {
     constructor(origin, width, height, reflectivity) {
@@ -42,7 +42,7 @@ class Reflector {
         this.origin = origin;
         this.width = width;
         this.height = height;
-        this.gain = intensity;
+        this.intensity = intensity;
         this.direction = direction
         console.log('Lightfront initialized');
     }
@@ -53,27 +53,42 @@ class Reflector {
           if (this.origin[0] < left_mirror.origin[0] + left_mirror.width){
             //reverse the direction and change intensity of current wave
               this.direction = 1;
-              this.intensity = this.intensity * left_mirror.reflectivity; 
+              let new_intensity = this.intensity * (1-left_mirror.reflectivity);
+              this.intensity = this.intensity *(left_mirror.reflectivity); 
               this.origin = [left_mirror.origin[0]+25, 10];
             //create a new wave with no loss remaining intensity to travel
-            table.light_list.push(new Lightfront([left_mirror.origin[0]-25, 10], 10, 400, 1, -1));
+            
+            table.light_list.push(new Lightfront([left_mirror.origin[0]-25, 10], 10, 400, new_intensity, -1));
           }
 
           //check reflections in the right mirror
           if (this.origin[0] > right_mirror.origin[0]){
             //reverse the direction and change intensity of current wave
             this.direction = -1;
-            this.intensity = this.intensity * right_mirror.reflectivity; 
+            let new_intensity = this.intensity * (1-right_mirror.reflectivity);
+            this.intensity = this.intensity *(right_mirror.reflectivity); 
             this.origin = [right_mirror.origin[0]-25, 10];
             //create a new wave with no loss remaining intensity to travel
-            table.light_list.push(new Lightfront([right_mirror.origin[0]+25, 10], 10, 400, 1, 1));
+           
+            table.light_list.push(new Lightfront([right_mirror.origin[0]+25, 10], 10, 400, new_intensity, 1));
           }
 
 
         }
+
+        intenisify(element_gain)
+        {
+          if(this.origin[0] > element_gain.origin[0] && this.origin[0] < element_gain.origin[0] + element_gain.width){
+            this.intensity += element_gain.gain;
+          }
+        }
         
         draw(canvas){
-          ctx.fillStyle = RGB2Hex(200, 50, 150);
+          let r_intensity = Math.floor(this.intensity);
+          let g_intensity = Math.floor(this.intensity);
+          let b_intensity = Math.floor(this.intensity);
+          
+          ctx.fillStyle = RGB2Hex(r_intensity, g_intensity, b_intensity);
           canvas.fillRect(this.origin[0], this.origin[1], this.width, this.height)
         } 
 
@@ -111,6 +126,7 @@ class Reflector {
       move_waves(){
         for(const item of this.light_list) {
           item.move();
+          item.intenisify(gain_element);
         }
       }
     
@@ -140,19 +156,19 @@ ctx.fillRect(0, 0, c.width, c.height);
 //initialize the "table" and it's mirror setup
 let light_table = new Table();
 
-let mirror1 = new Reflector([50,10], 20, 400, 0.99);
+let mirror1 = new Reflector([60,10], 20, 400, 0.90);
 light_table.scene_list.push(mirror1);
 
-let mirror2 = new Reflector([250, 10], 20, 400, 0.50);
+let mirror2 = new Reflector([400, 10], 20, 400, 0.10);
 light_table.scene_list.push(mirror2);
 
-let gain_element = new Gain_element([100, 50], 100, 300, 3);
+let gain_element = new Gain_element([110, 50], 200, 300, 1);
 light_table.scene_list.push(gain_element);
 
 
 //initialize the primary light front
 
-let light_front_1 = new Lightfront([100, 10], 10, 400, 1, -1);
+let light_front_1 = new Lightfront([110, 10], 10, 400, 30, -1);
 light_table.light_list.push(light_front_1);
 
 
@@ -168,32 +184,36 @@ light_table.draw_lights(ctx);
 
 function Update()
 {
-  //clear the screen for updates
-  ctx.fillStyle = "black";
-  ctx.fillRect(0, 0, c.width, c.height);
-
-  //check to see if any light fronts are off screen and eliminate them from the list
-  light_table.check_bounds();
-
-  //check for reflections
-  light_front_1.check_reflection(mirror1, mirror2, light_table);
   
-  //move the light front(s) 
-  light_table.move_waves();
+  
+      //clear the screen for updates
+      ctx.fillStyle = "black";
+      ctx.fillRect(0, 0, c.width, c.height);
 
-  //paint the scene
-  light_table.draw_scene(ctx);
+      //check to see if any light fronts are off screen and eliminate them from the list
+      light_table.check_bounds();
 
-  //paint the light fronts on top of the scene
-  light_table.draw_lights(ctx);
+      //check for reflections
+      light_front_1.check_reflection(mirror1, mirror2, light_table);
+      
+      //move the light front(s) 
+      light_table.move_waves();
 
+      //check to see if inside the gain element and increase the intensity by the gain
 
-  //add a delay...just cause...
-  console.log("loop executed")
+      //paint the scene
+      light_table.draw_scene(ctx);
+
+      //paint the light fronts on top of the scene
+      light_table.draw_lights(ctx);
+  
 
 }
 
 
+setInterval(() => {
+  Update();
+}, 10)
 
 
 
