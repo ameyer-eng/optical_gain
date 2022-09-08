@@ -1,3 +1,5 @@
+let speed_limit_c = 4;
+
 class Reflector {
     constructor(origin, width, height, reflectivity) {
       this.origin = origin;
@@ -57,6 +59,16 @@ class Reflector {
             table.light_list.push(new Lightfront([left_mirror.origin[0]-25, 10], 10, 400, 1, -1));
           }
 
+          //check reflections in the right mirror
+          if (this.origin[0] > right_mirror.origin[0]){
+            //reverse the direction and change intensity of current wave
+            this.direction = -1;
+            this.intensity = this.intensity * right_mirror.reflectivity; 
+            this.origin = [right_mirror.origin[0]-25, 10];
+            //create a new wave with no loss remaining intensity to travel
+            table.light_list.push(new Lightfront([right_mirror.origin[0]+25, 10], 10, 400, 1, 1));
+          }
+
 
         }
         
@@ -66,7 +78,7 @@ class Reflector {
         } 
 
         move(){
-          this.origin[0] += this.direction;
+          this.origin[0] += this.direction*speed_limit_c;
         }
 
     
@@ -131,10 +143,10 @@ let light_table = new Table();
 let mirror1 = new Reflector([50,10], 20, 400, 0.99);
 light_table.scene_list.push(mirror1);
 
-let mirror2 = new Reflector([500,10], 20, 400, 0.50);
+let mirror2 = new Reflector([250, 10], 20, 400, 0.50);
 light_table.scene_list.push(mirror2);
 
-let gain_element = new Gain_element([100, 50], 250, 300, 3);
+let gain_element = new Gain_element([100, 50], 100, 300, 3);
 light_table.scene_list.push(gain_element);
 
 
