@@ -16,6 +16,53 @@ class Reflector {
     }
   }
 
+  class Capacitor {
+    //Notes:
+    // I'm not planning to have a draw function as there is no purpose to draw cap to screen in laser
+
+    constructor(Voltage, uF, type, breakdown_voltage) {
+      this.Voltage = Voltage;
+      this.uF = uF;
+      this.type = type;
+      this.breakdown_voltage = breakdown_voltage;
+      console.log('Capacitor initialized');
+    }
+
+    Calculate_remaining_energy(t)
+    {
+
+    }
+
+  }
+
+  class Flashlamp {
+    //Notes:
+    //Ionization time not taken into account just cap discharge equation
+
+    constructor(Trigger_Voltage, Ionize_V_Drop, shatter_temp, initial_temp, length, radius, initial_pressure) {
+      this.Trigger_Voltage = Trigger_Voltage;
+      this.Ionize_V_Drop = Ionize_V_drop;
+      this.shatter_temp = shatter_temp;
+      this.initial_temp = initial_temp;
+      this.length = length;
+      this.radius = raidus;
+      this.pressure = initial_pressure;
+      // add formula for this.volume to calculate volume on creation 
+
+      console.log('Capacitor initialized');
+    }
+
+    Check_Trigger()
+    {
+
+    }
+
+    Output_Intensity()
+    {
+
+    }
+
+  }
 
 
 
@@ -215,7 +262,8 @@ setInterval(() => {
   Update();
 }, 10)
 
-
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
 
